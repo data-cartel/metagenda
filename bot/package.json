@@ -1,10 +1,11 @@
 {
-  "name": "metagenda",
+  "name": "metagenda-bot",
   "version": "0.1.0",
   "bin": "dist/index.js",
   "main": "dist/index.js",
   "types": "dist/*/**.d.ts",
   "scripts": {
+    "run": "ts-node -P tsconfig.json src/index.ts",
     "build": "tsc -P tsconfig.json",
     "build:watch": "tsc -P tsconfig.json -w",
     "test": "vitest -c tsconfig.test.json --run",
@@ -18,13 +19,13 @@
     "@eslint/js": "^9.5.0",
     "@types/eslint__js": "^8.42.3",
     "@types/node": "^20.14.2",
+    "@types/node-fetch": "^2.6.11",
     "eslint": "^8.57.0",
     "prettier": "3.2.5",
     "typescript": "^5.4",
     "typescript-eslint": "^7.13.0"
   },
   "dependencies": {
-    "@effect/cli": "^0.36.43",
     "@effect/opentelemetry": "^0.34.17",
     "@effect/platform-node": "^0.51.8",
     "@opentelemetry/core": "^1.25.0",
@@ -32,7 +33,8 @@
     "@opentelemetry/sdk-trace-base": "^1.25.0",
     "@opentelemetry/sdk-trace-node": "^1.25.0",
     "@opentelemetry/sdk-trace-web": "^1.25.0",
+    "dotenv": "^16.4.5",
     "effect": "3.4.0",
-    "yaml": "^2.4.5"
+    "grammy": "^1.26.1"
   }
 }

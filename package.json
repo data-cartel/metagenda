@@ -19,5 +19,5 @@
     "quoteProps": "consistent",
     "arrowParens": "avoid"
   },
-  "workspaces": ["cli", "ext", "web"]
+  "workspaces": ["bot", "cli", "web"]
 }

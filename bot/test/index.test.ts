@@ -1,28 +1,27 @@
 import { NodeSdk } from "@effect/opentelemetry"
 import { NodeContext } from "@effect/platform-node"
 import { Effect } from "effect"
+import { expect } from "vitest"
 import { it } from "@effect/vitest"
 import {
     SimpleSpanProcessor,
-    ConsoleSpanExporter,
+    InMemorySpanExporter,
 } from "@opentelemetry/sdk-trace-base"
 
-import { metagendaFx } from "../src/agenda"
-
-const TracingTest = NodeSdk.layer(
+const TracingLive = NodeSdk.layer(
     Effect.sync(() => ({
         resource: {
             serviceName: "test",
         },
-        spanProcessor: [new SimpleSpanProcessor(new ConsoleSpanExporter())],
+        spanProcessor: [new SimpleSpanProcessor(new InMemorySpanExporter())],
     })),
 )
 
-it.live("should work", () =>
-    Effect.gen(function* () {
-        yield* metagendaFx(true)
+it.effect("placeholder", () =>
+    Effect.sync(() => {
+        expect(1).toBe(1)
     }).pipe(
-        Effect.provide(TracingTest),
+        Effect.provide(TracingLive),
         Effect.provide(NodeContext.layer),
         // NodeRuntime.runMain,
     ),
