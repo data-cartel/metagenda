@@ -15,9 +15,6 @@ export const $ = (command: string): platform.Command.Command => {
 
 export const sh = (command: string) => platform.Command.lines($(command))
 
-export const reposPath = `${process.env.HOME}/code/0xgleb`
-export const vaultPath = `${reposPath}/vault`
-
 export const editCmd = (path: string) =>
     platform.Command.make("emacsclient", "-nw", "-r", path).pipe(std)
 

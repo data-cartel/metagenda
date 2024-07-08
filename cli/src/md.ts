@@ -6,17 +6,10 @@ import * as fs from "fs"
 
 import { Cfg, DurationSetting, Project, cfgFx } from "./cfg"
 import { announceFx, today } from "./time"
-import { vaultPath, sh } from "./sys"
+import { sh } from "./sys"
 import { zessionFx } from "./cast"
 import { journalFx, planFx } from "./review"
-import {
-    Action,
-    LineOfWork,
-    Priority,
-    Todo,
-    fmtLineOfWork,
-    urgency,
-} from "./todo"
+import { Action, LineOfWork, Priority, Todo, urgency } from "./todo"
 
 export interface MdTag {
     readonly tag: string
@@ -59,7 +52,7 @@ export const loadFileAttrs = (path: string): Record<string, string> => {
 
 export const todoRegex = /^\s*- \[.\] /g
 const timeRegex = /(?<hours>\d{2}):(?<minutes>\d{2})/g
-const tagRegex = /\s#(?<tag>[a-zA-Z0-9\-_/]+)/g
+export const tagRegex = /\s#(?<tag>[a-zA-Z0-9\-_/]+)/g
 const dataviewRegex = /\[(?<name>\w+):: (?<value>[a-zA-Z0-9.\-_]+)\],?/g
 
 export const fromRaw = (
@@ -95,8 +88,10 @@ export const fromRaw = (
     const lineOfWork = project
         ? LineOfWork(
               [
-                  project as string,
-                  ...(firstTag ? [firstTag.tag] : []),
+                  project,
+                  ...(firstTag && firstTag.tag !== project
+                      ? [firstTag.tag]
+                      : []),
                   ...qualifier,
               ].join("/"),
           )
@@ -187,7 +182,7 @@ export const taskMd = (todo: Todo & { fromd: Omit<Fromd, "raw"> }) => {
         .map(([name, value]) => `[${name}:: ${value}]`)
         .join(" ")
 
-    return `${indent}${prefix}${todo.description} #${fmtLineOfWork(todo.lineOfWork)} ${dataview}`.trimEnd()
+    return `${indent}${prefix}${todo.description} #${todo.lineOfWork} ${dataview}`.trimEnd()
 }
 
 export const updMd = (todo: MdTodo) => {
@@ -211,7 +206,7 @@ export const updMdFx = (todo: MdTodo) =>
 
 export const fileTodosFx = (path: string) =>
     Effect.gen(function* () {
-        const cfg = yield* cfgFx
+        const cfg = yield* cfgFx()
         const lines = fs.readFileSync(path, "utf8").split("\n")
 
         if (lines.length === 0) return [] as MdTodo[]
@@ -283,6 +278,14 @@ export const fileTodosFx = (path: string) =>
 
 export const vaultodosFx = (filter?: (todo: MdTodo) => boolean) =>
     Effect.gen(function* () {
+        if (process.title.includes("vitest")) {
+            const paths = [`${__dirname}/../test/backlog.md`]
+            const tasks: MdTodo[][] = yield* Effect.all(paths.map(fileTodosFx))
+            return tasks.flat().filter(filter ?? (() => true))
+        }
+
+        const { vaultPath } = yield* cfgFx()
+
         const out = yield* sh(`git -C ${vaultPath} ls-files`)
         const paths = out
             .filter(_ => !_.startsWith("archive"))
@@ -319,7 +322,7 @@ export const flattenTodo = ({
 export const doFx = (todo: Todo, fromd?: Fromd) =>
     Effect.gen(function* () {
         const { lineOfWork } = todo
-        const cfg = yield* cfgFx
+        const cfg = yield* cfgFx()
         const exe = exeFx(todo.dryRun)
 
         if (todo.action === ("afk" as const)) {

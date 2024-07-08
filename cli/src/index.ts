@@ -31,7 +31,7 @@ const doCli = Command.make(
   ({ lineOfWorkArg: lineOfWorkStr, dryRunOpt: dryRun }) =>
     Effect.gen(function* () {
       const lineOfWork = LineOfWork(lineOfWorkStr)
-      const cfg = yield* cfgFx
+      const cfg = yield* cfgFx()
       yield* doFx({
         ...Todo(
           lineOfWork,

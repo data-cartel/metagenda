@@ -1,4 +1,4 @@
-import { Duration } from "effect"
+import { Brand, Duration } from "effect"
 
 import { Project } from "./cfg"
 
@@ -107,39 +107,40 @@ export const Todo = (
     }
 }
 
-export interface LineOfWork {
-    readonly project: Project
-    readonly qualifier?: string[]
-}
+export type LineOfWork = string & Brand.Brand<"LineOfWork">
 
-export const LineOfWork = (path: string): LineOfWork => {
-    const [project, ...sub] = path.split("/").filter(_ => _.length)
+export const LineOfWork = (path: string): LineOfWork =>
+    Brand.refined<LineOfWork>(
+        path => path.match(/[a-zA-Z0-9\-_/]+/) !== null,
+        path => Brand.error(`Invalid LineOfWork path format: ${path}`),
+    )(path.trim())
+
+export const splitLineOfWork = (lofw: LineOfWork) => {
+    const [project, ...sub] = lofw.split("/").filter(_ => _.length)
     const qualifier = sub.length && sub[0] === project ? sub.slice(1) : sub
     return qualifier.length
         ? { project: Project(project), qualifier }
         : { project: Project(project) }
 }
 
-export const fmtLineOfWork = (lofw?: LineOfWork) =>
-    lofw
-        ? lofw.qualifier
-            ? [lofw.project, ...lofw.qualifier].join("/")
-            : lofw.project
-        : ""
-
 export const inLineWith =
     (ref?: LineOfWork) =>
-    (check: undefined | LineOfWork): boolean => {
+    (check?: LineOfWork): boolean => {
         if (!ref) return true
         if (!check) return false
 
-        if (ref.project !== check.project) return false
+        const { project: refProject, qualifier: refQualifier } =
+            splitLineOfWork(ref)
+        const { project: checkProject, qualifier: checkQualifier } =
+            splitLineOfWork(check)
 
-        if (!ref.qualifier) return true
-        if (!check.qualifier) return false
-        if (check.qualifier.length < ref.qualifier.length) return false
+        if (refProject !== checkProject) return false
 
-        return ref.qualifier.every(
-            (chunk, index) => chunk === check.qualifier![index],
+        if (!refQualifier) return true
+        if (!checkQualifier) return false
+        if (checkQualifier.length < refQualifier.length) return false
+
+        return refQualifier.every(
+            (chunk, index) => chunk === checkQualifier[index],
         )
     }

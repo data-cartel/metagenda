@@ -9,15 +9,19 @@ import {
 } from "@opentelemetry/core"
 import { Effect, LogLevel, Logger } from "effect"
 
-import { fmtTime, today } from "./time"
-import { $, reposPath, std } from "./sys"
+import { $, std } from "./sys"
+import { cfgFx } from "./cfg"
+import { LineOfWork } from "./todo"
 
 export const logger = Logger.minimumLogLevel(LogLevel.Debug)
 
 export const exportCli = cli.Command.make("export", {}, () => exportFx)
 export const exportFx = Effect.gen(function* () {
+    const cfg = yield* cfgFx()
+    const repoPath = cfg[LineOfWork("metagenda")].repoPath!
+
     const lines = fs
-        .readFileSync(`${reposPath}/metagenda/logs.jsonl`, "utf8")
+        .readFileSync(`${repoPath}/logs.jsonl`, "utf8")
         .split("\n")
         .map(line => line.trim())
         .filter(line => line.length > 0)
@@ -39,7 +43,7 @@ export const exportFx = Effect.gen(function* () {
     const header = "name,timestamp,duration"
     const csv = [header, ...logs].join("\n")
 
-    const outPath = `${reposPath}/metagenda/logs.csv`
+    const outPath = `${repoPath}/logs.csv`
     fs.writeFileSync(outPath, csv)
 
     yield* $(`bat ${outPath}`).pipe(std)
@@ -73,28 +77,7 @@ export class FileSpanExporter implements SpanExporter {
     private flush() {
         const jsonLogs =
             this.spans.map(span => JSON.stringify(span)).join("\n") + "\n"
-        fs.appendFileSync(`${reposPath}/metagenda/logs.jsonl`, jsonLogs)
-
-        const mdLogs = this.spans
-            .filter(span => !span.parentId && span.duration > 1000000)
-            .map(span => {
-                const timestamp = span.timestamp / 1000
-                const start = new Date(timestamp)
-
-                const end = new Date(timestamp + span.duration / 1000)
-
-                const entry = span.attributes.task
-                    ? `\n- ${fmtTime(start)} - ${fmtTime(end)} ${span.attributes.task} ${span.name}`
-                    : `\n- ${fmtTime(start)} - ${fmtTime(end)} ${span.name}`
-
-                return entry
-            })
-            .join("\n")
-
-        const dailyPath = `${reposPath}/vault/daily/${today()}.md`
-
-        fs.appendFileSync(dailyPath, mdLogs)
-
+        fs.appendFileSync(`${__dirname}/../../logs.jsonl`, jsonLogs)
         this.spans = []
     }
 

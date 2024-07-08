@@ -3,6 +3,7 @@ import { Option, Effect } from "effect"
 import * as platform from "@effect/platform"
 import { cfgFx } from "./cfg"
 
+// TODO: interface Notifier
 export const announceFx = (duration: DurationInput, msg: string) => {
   console.clear()
   return withTimeout(duration)(
@@ -11,7 +12,7 @@ export const announceFx = (duration: DurationInput, msg: string) => {
         const terminal = yield* _(platform.Terminal.Terminal)
         const columns = yield* _(terminal.columns)
 
-        const cfg = yield* cfgFx
+        const cfg = yield* cfgFx()
         const delay = millis(cfg.spamDelayMs)
         const separator = " ".repeat(Math.floor(msg.length / 3))
         const perLine = Math.floor(columns / (msg.length + separator.length))

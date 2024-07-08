@@ -2,17 +2,22 @@ import { Effect, Duration } from "effect"
 
 import { inLineWith, Progress } from "./todo"
 import { announceFx, fmtDate } from "./time"
-import { obsidianFx, vaultPath } from "./sys"
+import { obsidianFx } from "./sys"
 import { journalFx } from "./review"
 import { MdTodo, doFx, exeFx, vaultodosFx, updMdFx, fileTodosFx } from "./md"
+import { cfgFx } from "./cfg"
 
+// TODO: abstract away task source
 export const metagendaFx = (dryRun: boolean) =>
     Effect.gen(function* () {
         const exe = exeFx(dryRun)
 
+        const { vaultPath } = yield* cfgFx()
         const now = new Date()
         const tododay = yield* fileTodosFx(
-            `${vaultPath}/daily/${fmtDate(now)}.md`,
+            process.title.includes("vitest")
+                ? `${__dirname}/../test/daily.md`
+                : `${vaultPath}/daily/${fmtDate(now)}.md`,
         )
 
         const daily = tododay.filter(({ progress }) => progress !== "done")

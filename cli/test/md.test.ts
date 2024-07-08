@@ -22,7 +22,7 @@ const TracingLive = NodeSdk.layer(
 
 it.effect("works on individual tasks", () =>
     Effect.gen(function* () {
-        const cfg = yield* cfgFx
+        const cfg = yield* cfgFx()
         const todos = yield* fileTodosFx(`${__dirname}/backlog.md`)
         expect(todos.length).toBeGreaterThan(0)
         for (const todo of todos) {

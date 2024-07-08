@@ -1,13 +1,14 @@
 import * as platform from "@effect/platform"
 import { Effect, Option, Duration, Match } from "effect"
 
-import { Project, cfgFx } from "./cfg"
-import { $, std, sh, reposPath, vaultPath } from "./sys"
+import { cfgFx } from "./cfg"
+import { $, std, sh } from "./sys"
 import { playbackFx } from "./cast"
 import { announceFx } from "./time"
-import { LineOfWork, Progress, Todo, fmtLineOfWork } from "./todo"
+import { LineOfWork, Progress, Todo } from "./todo"
 import { Fromd, updMdFx } from "./md"
 
+// TODO: interface ProgressChecker
 const completionPromptFx = (task: string) =>
     Effect.gen(function* (_) {
         const { display, readInput } = yield* _(platform.Terminal.Terminal)
@@ -28,21 +29,15 @@ const completionPromptFx = (task: string) =>
 export const planFx = (lineOfWork: LineOfWork) =>
     Effect.gen(function* () {
         // yield* obsidianFx(`backlog/${lineOfWork.project}`)
-        const cfg = yield* cfgFx
+        const cfg = yield* cfgFx()
 
         yield* playbackFx(lineOfWork, cfg.planPlaybackSpeed)
-    }).pipe(Effect.withSpan(`plan #${fmtLineOfWork(lineOfWork)}`))
+    }).pipe(Effect.withSpan(`plan #${lineOfWork}`))
 
-const repoPath = (project: Project) =>
-    Match.value(project).pipe(
-        Match.when("x23.ai", () => `${reposPath}/x23.ai/aggregator`),
-        Match.when("solanalysis", () => `${reposPath}/data-cartel/solanalysis`),
-        Match.orElse(() => `${reposPath}/${project}`),
-    )
-
+// TODO: replace crazy if statements with dependency injection
 export const journalFx = (todo: Todo, fromd?: Fromd) =>
     Effect.gen(function* (_) {
-        const cfg = yield* cfgFx
+        const cfg = yield* cfgFx()
 
         if (!fromd) {
             if (todo.action === ("hack" as const) && todo.lineOfWork)
@@ -70,23 +65,21 @@ export const journalFx = (todo: Todo, fromd?: Fromd) =>
 
         const date = new Date()
         const msg = date.toISOString()
-        yield* $(`git -C ${vaultPath} add .`).pipe(std)
-        yield* $(`git -C ${vaultPath} commit -m ${msg}`).pipe(std)
-        yield* $(`git -C ${vaultPath} show HEAD`).pipe(std)
+        yield* $(`git -C ${cfg.vaultPath} add .`).pipe(std)
+        yield* $(`git -C ${cfg.vaultPath} commit -m ${msg}`).pipe(std)
 
         if (todo.action === ("hack" as const)) {
             if (progress === "done") {
-                if (todo.lineOfWork) {
-                    const { project } = todo.lineOfWork
+                // TODO: this should either use Project as the key or have a way
+                // of loading values from less qualified configs if no exact
+                // matches were found for the full line of work path
+                if (todo.lineOfWork && cfg[todo.lineOfWork].repoPath) {
+                    const repoPath = cfg[todo.lineOfWork].repoPath
 
                     console.clear()
-                    yield* $(`git -C ${repoPath(project)} add .`).pipe(std)
-                    yield* $(`git -C ${repoPath(project)} status`).pipe(std)
-
-                    yield* $(
-                        `git -C ${repoPath(project)} commit`, // -m '${commitMsg.trim()}'`,
-                    ).pipe(std)
-                    yield* $(`git -C ${repoPath(project)} show HEAD`).pipe(std)
+                    yield* $(`git -C ${repoPath} add .`).pipe(std)
+                    yield* $(`git -C ${repoPath} commit`).pipe(std)
+                    yield* $(`git -C ${repoPath} show HEAD`).pipe(std)
                 }
 
                 if (cfg.obsEnabled) {

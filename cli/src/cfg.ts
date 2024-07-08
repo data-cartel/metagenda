@@ -3,9 +3,7 @@ import * as cli from "@effect/cli"
 import { Duration, Effect, Match, Option } from "effect"
 import YAML from "yaml"
 
-import { reposPath } from "./sys"
-import { today } from "./time"
-import { Action } from "./todo"
+import { Action, LineOfWork } from "./todo"
 
 export type Project = string & { readonly __tag: unique symbol }
 
@@ -55,13 +53,43 @@ export const DurationSetting = (
     )
 }
 
-export type Cfg = Record<Action, DurationSetting> & {
-    spamSecs: number
-    spamDelayMs: number
-    obsEnabled: boolean
-    planPlaybackSpeed: number
-    journalPlaybackSpeed: number
+export type ActionsCfg = Record<Action, DurationSetting>
+
+export interface LineOfWorkCfg {
+    repoPath?: string
 }
+
+// TODO: this should either use Project as the key or have a way
+// of loading values from less qualified configs if no exact
+// matches were found for the full line of work path
+export type LineOfWorkCfgs = Record<LineOfWork, LineOfWorkCfg>
+
+export type Cfg = ActionsCfg &
+    LineOfWorkCfgs & {
+        spamSecs: number
+        spamDelayMs: number
+        obsEnabled: boolean
+        planPlaybackSpeed: number
+        journalPlaybackSpeed: number
+        vaultPath: string
+    }
+
+export const cfgFx = (customPath?: string) =>
+    Effect.sync<Cfg>(() => {
+        const homeCfgPath = `${process.env.HOME}/.config/metagenda.yaml`
+        const path =
+            customPath ??
+            (process.title.includes("vitest")
+                ? `${__dirname}/../test/metagenda.yaml`
+                : homeCfgPath)
+
+        // TODO: use Effect's type-safe error handling
+        if (!fs.existsSync(path))
+            throw new Error(`Config file not found: ${path}`)
+
+        const contents = fs.readFileSync(path, "utf8")
+        return YAML.parse(contents, { strict: false }) as Cfg
+    })
 
 export const cfgCli = cli.Command.make(
     "cfg",
@@ -69,8 +97,8 @@ export const cfgCli = cli.Command.make(
     ({ path }) =>
         Effect.gen(function* () {
             const cfg = yield* Option.match(path, {
-                onNone: () => cfgFx,
-                onSome: (path: string) => loadCfgFx(path),
+                onNone: () => cfgFx(),
+                onSome: (path: string) => cfgFx(path),
             })
             console.log(JSON.stringify(cfg, null, 2))
             if ("hack" in cfg) {
@@ -79,20 +107,3 @@ export const cfgCli = cli.Command.make(
             }
         }),
 )
-
-const loadCfgFx = (path: string) =>
-    Effect.sync<Cfg>(() => {
-        const lines = fs.readFileSync(path, "utf8").split("\n")
-
-        const frontMatterEnd = lines.indexOf("---", 1)
-        const frontMatter = lines.slice(1, frontMatterEnd).join("\n")
-
-        const parsed = YAML.parse(frontMatter, { strict: false }) as Cfg
-        return parsed
-    })
-
-export const cfgFx = Effect.gen(function* () {
-    const global = yield* loadCfgFx(`${reposPath}/vault/cfg.md`)
-    const daily = yield* loadCfgFx(`${reposPath}/vault/daily/${today()}.md`)
-    return { ...global, ...daily }
-})
