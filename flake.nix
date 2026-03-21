@@ -80,13 +80,6 @@
                   npm.enable = true;
                   npm.install.enable = true;
                 };
-                python = {
-                  enable = true;
-                  venv = {
-                    quiet = true;
-                    requirements = "auto-editor";
-                  };
-                };
               };
 
               delta.enable = true;
