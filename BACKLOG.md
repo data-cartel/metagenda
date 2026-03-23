@@ -2,6 +2,12 @@
 
 ## High priority
 
+- [ ] Review codebase and keep only useful code
+- [ ] Design spec for what we want metagenda to be
+- [ ] Update tech stack
+
+## Test coverage
+
 - [ ] Add test coverage
 	- [x] Pick testing library (vitest)
 	- [ ] Add unit tests for markdown parsing invariants (`md.ts`): roundtrip encode/decode, tag extraction, subtask inheritance
@@ -10,7 +16,20 @@
 	- [ ] Add unit/integration tests for config loading and fallback behavior (`cfg.ts`): YAML parse, missing keys, `LineOfWorkCfgs` lookup
 	- [ ] Add tests for review workflow (`review.ts`): completion prompts, git commit side-effects, journal generation
 	- [ ] Add CI test job with coverage threshold (coverage >= 80%)
+
+## Features
+
 - [ ] Create a command for playing back multiple recordings
+- [ ] Implement the review action for a given line of work
+- [ ] Assert that markdown todos can be encoded to a string identical to raw
+- [ ] Make `announceFx` delay value dynamic based on action
+- [ ] Create an interactive task review/update process
+- [ ] Automatically move done tasks below todos
+- [ ] Create a daily template
+- [ ] Show remaining time in `spamFx`
+- [ ] Implement daily hooks that only run once a day based on presence of artifacts
+- [ ] Voice over flow
+- [ ] Find out how to switch focus between windows programmatically
 
 ## Refactoring
 
@@ -24,19 +43,6 @@
 
 - [ ] Make `LineOfWorkCfgs` lookup fall back to less-qualified config paths (`cfg.ts`, `review.ts`)
 - [ ] Use Effect's type-safe error handling for config file loading (`cfg.ts`)
-
-## Features
-
-- [ ] Implement the review action for a given line of work
-- [ ] Assert that markdown todos can be encoded to a string identical to raw
-- [ ] Make `announceFx` delay value dynamic based on action
-- [ ] Create an interactive task review/update process
-- [ ] Automatically move done tasks below todos
-- [ ] Create a daily template
-- [ ] Show remaining time in `spamFx`
-- [ ] Implement daily hooks that only run once a day based on presence of artifacts
-- [ ] Voice over flow
-- [ ] Find out how to switch focus between windows programmatically
 
 ## Observability
 
