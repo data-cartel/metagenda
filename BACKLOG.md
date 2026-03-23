@@ -4,7 +4,12 @@
 
 - [ ] Add test coverage
 	- [x] Pick testing library (vitest)
-	- [ ] Write tests
+	- [ ] Add unit tests for markdown parsing invariants (`md.ts`): roundtrip encode/decode, tag extraction, subtask inheritance
+	- [ ] Add unit tests for task model utilities (`todo.ts`): priority ordering, urgency calculation, `splitLineOfWork`
+	- [ ] Add unit tests for scheduling logic (`agenda.ts`): task selection, progress state transitions, subtask traversal
+	- [ ] Add unit/integration tests for config loading and fallback behavior (`cfg.ts`): YAML parse, missing keys, `LineOfWorkCfgs` lookup
+	- [ ] Add tests for review workflow (`review.ts`): completion prompts, git commit side-effects, journal generation
+	- [ ] Add CI test job with coverage threshold (coverage >= 80%)
 - [ ] Create a command for playing back multiple recordings
 
 ## Refactoring
