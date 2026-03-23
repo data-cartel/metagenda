@@ -27,6 +27,12 @@
 - [ ] Make `announceFx` delay value dynamic based on action #cli/action
 - [ ] Create an interactive task review/update process #cli/interactive
 
+- [ ] Abstract away task source behind an interface (`agenda.ts`, `review.ts`) #cli/refactor
+- [ ] Extract `Notifier` interface from `announceFx` (`time.ts`) #cli/refactor
+- [ ] Extract `ProgressChecker` interface from `completionPromptFx` (`review.ts`) #cli/refactor
+- [ ] Replace conditional logic in `journalFx` with dependency injection (`review.ts`) #cli/refactor
+- [ ] Make `LineOfWorkCfgs` lookup fall back to less-qualified config paths (`cfg.ts`, `review.ts`) #cli/cfg
+- [ ] Use Effect's type-safe error handling for config file loading (`cfg.ts`) #cli/cfg
 - [ ] Fix logs not getting added as events to traces
 - [ ] Automatically move done tasks below todos
 - [ ] Create a daily template
