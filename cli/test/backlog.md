@@ -1,6 +1,0 @@
-- [!] Add test coverage #cli/tests
-- [ ] Implement the review action for a given line of work #cli/review
-- [ ] Assert that markdown todos can be encoded to a string identical to raw #cli/md/serde
-- [x] Fix inline metadata setting #cli/inline-fix
-- [x] Move markdown-related code to a separate module #cli/md [id:: md.ts]
-- [x] Set up strict linting and make it happy #metagenda/linter [completion:: 2024-06-16]
