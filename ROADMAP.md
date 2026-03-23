@@ -2,8 +2,10 @@
 
 ## Overrun
 
-- [!] Add test coverage #cli/tests
-- [!] Create a command for playing back multiple recordings #cli/review/playback
+- [ ] Add test coverage #cli/tests
+    - [x] Figure out what's the 2024 js testing library
+    - [ ] Write tests
+- [ ] Create a command for playing back multiple recordings #cli/review/playback
 
 ## Refactoring
 
@@ -58,7 +60,6 @@
 - [x] Move markdown-related code to a separate module #cli/md
 - [x] Show the task before the completion prompt #cli
 - [x] Refactor metagenda item step #cli/refactor-step
-- [x] Figure out what's the 2024 js testing library #cli/tests
 - [x] Extend CLI to support non zellij-based tasks [completion:: 2024-06-21]
 - [x] Deal with untracked vault files not getting searched [completion:: 2024-06-21]
 - [x] Prompt for commit messages and auto commit to git #cli [completion:: 2024-06-20]
