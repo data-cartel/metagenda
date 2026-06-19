@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "version": "0.1.0",
-  "author": "0xgleb",
+  "author": "Data Clique Software Design FZCO",
   "scripts": {
     "build": "npm run -w web build && npm run -w cli build",
     "lint": "npm run -w cli lint"
