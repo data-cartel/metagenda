@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "author": "Data Clique Software Design FZCO",
   "scripts": {
-    "build": "npm run -w web build && npm run -w cli build",
+    "build": "npm run -w cli build",
     "lint": "npm run -w cli lint"
   },
   "devDependencies": {
@@ -19,5 +19,5 @@
     "quoteProps": "consistent",
     "arrowParens": "avoid"
   },
-  "workspaces": ["bot", "cli", "web"]
+  "workspaces": ["cli"]
 }
